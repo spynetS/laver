@@ -24,33 +24,33 @@ void update_ball(Ball *ball, int width, int height) {
 }
 
 
-void draw_ball(Canvas* canvas, Ball *ball) {
-	int r = ball->r/2;
-	int x = r;
-	int y = 0;
-	int decision = 1 - r;
+/* void draw_ball(Canvas* canvas, Ball *ball) { */
+/* 	int r = ball->r/2; */
+/* 	int x = r; */
+/* 	int y = 0; */
+/* 	int decision = 1 - r; */
 
-	while (x >= y) {
-		setPixel(canvas,ball->x + x, ball->y + y, "@", RED, RED);
-		setPixel(canvas,ball->x - x, ball->y + y, "@", RED, RED);
-		setPixel(canvas,ball->x + x, ball->y - y, "@", RED, RED);
-		setPixel(canvas,ball->x - x, ball->y - y, "@", RED, RED);
-		setPixel(canvas,ball->x + y, ball->y + x, "@", RED, RED);
-		setPixel(canvas,ball->x - y, ball->y + x, "@", RED, RED);
-		setPixel(canvas,ball->x + y, ball->y - x, "@", RED, RED);
-		setPixel(canvas,ball->x - y, ball->y - x, "@", RED, RED);
+/* 	while (x >= y) { */
+/* 		setPixel(canvas,ball->x + x, ball->y + y, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x - x, ball->y + y, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x + x, ball->y - y, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x - x, ball->y - y, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x + y, ball->y + x, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x - y, ball->y + x, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x + y, ball->y - x, "@", RED, RED); */
+/* 		setPixel(canvas,ball->x - y, ball->y - x, "@", RED, RED); */
 		
-		y++;
+/* 		y++; */
 
-		if (decision <= 0) {
-			decision += 2*y + 1;
-		} else {
-			x--;
-			decision += 2*(y - x) + 1;
-		}
-	}
+/* 		if (decision <= 0) { */
+/* 			decision += 2*y + 1; */
+/* 		} else { */
+/* 			x--; */
+/* 			decision += 2*(y - x) + 1; */
+/* 		} */
+/* 	} */
 	
-}
+/* } */
 
 
 Ball* new_ball(int x, int y, int r){

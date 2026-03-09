@@ -9,22 +9,13 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-#define THRESHOLD 0.7f
+#define THRESHOLD 0.9f
 
 #define NUM_THREADS 12
-
-char *ascii1 = " .isk@";
-char *ascii0 =
-  " `.-':_,^=;><+!rc*/"
-  "z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
-
-char *unicode1[] = {"░", "▒", "▓", "█"};
 
 int WIDTH = 60;
 int HEIGHT = 60;
 int NUM_BALLS = 6;
-
-
 
 int brightness(int red, int green, int blue) {
   return (0.299 * red + green * 0.587 + blue * 0.114);
@@ -51,19 +42,11 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 				float t = fminf(F / THRESHOLD, 1.0f);     // overall blob intensity
 				float c = 0.5f;//fminf(maxF / balls[0]->r, 1.0f);  // local center intensity
 
-				int r = 100 + (int)(155 * c);  // emphasize center
+				int r = 100 + (int)(155 * t);  // emphasize center
 				int g = 100 + (int)(155 * t);  // overall blending
-				int b = 100;                    // keep bluish
+				int b = 255;                    // keep bluish
 
-				char* blaa = malloc(sizeof(char) * 100);
-				sprintf(blaa,"\033[38;2;%d;%d;%dm%s%s",r,g,b,
-								unicode1[(brightness(r,g,b) * (4 - 1) / 255)],
-								unicode1[(brightness(r,g,b) * (4 - 1) / 255)]);
-				/* sprintf(blaa,"\033[38;2;%d;%d;%dm%c%c",r,g,b, */
-				/* 				ascii1[(brightness(r,g,b) * (strlen(ascii1) - 1) / 255)], */
-				/* 				ascii1[(brightness(r,g,b) * (strlen(ascii1) - 1) / 255)]); */
-
-				setPixel(canvas,x,y,blaa,TRANS,TRANS);
+				set_pixel(canvas,x,y,r,g,b);
 			}
 		}
 	}
@@ -90,11 +73,14 @@ void* bla(void* arg) {
 int main(){
 	srand(time(NULL));
 
-	WIDTH = termWidth()/2-1;
+	WIDTH = termWidth()-1;
 	HEIGHT = termHeight()-1;
 		
-	Canvas *canvas = newCanvas(WIDTH, HEIGHT,"  ",RED, BG_GREEN);
+	Canvas *canvas = new_canvas(WIDTH, HEIGHT);
 	Ball* balls[NUM_BALLS*10];
+
+	disableEcho();
+	printf(HIDE_CURSOR);
 	
 	for(int i = 0; i < NUM_BALLS; i ++){
 		
@@ -102,7 +88,7 @@ int main(){
 	}
 	int running = 1;
 	while(running){
-		clearPixels(canvas);
+		//clearPixels(canvas);
 
 		if(kbhit() == 1){
 			switch((char)getchar()){
@@ -138,20 +124,18 @@ int main(){
 		}
 		
 		
-		//update(canvas,balls,NUM_BALLS);
 		for(int i = 0; i < NUM_BALLS; i ++){
-			//draw_ball(canvas, balls[i]);
 			update_ball(balls[i], WIDTH,HEIGHT);
 		}
 		
 		draw(canvas);
-		msleep(20);
+	 	msleep(20);
 	}
 	// TODO free the BALLS
 	for(int i = 0; i < NUM_BALLS; i ++){
 		free(balls[i]);
 	}
-	freeCanvas(canvas);
+	free_canvas(canvas);
 
 	return 0;
 }
