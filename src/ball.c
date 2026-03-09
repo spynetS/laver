@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
-
 void update_ball(Ball *ball, int width, int height) {
 
 	if (ball->x >= width){

@@ -9,9 +9,8 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-#define THRESHOLD 0.8f
+#define THRESHOLD 0.7f
 
-#define NUM_BALLS 6
 #define NUM_THREADS 12
 
 char *ascii1 = " .isk@";
@@ -23,13 +22,11 @@ char *unicode1[] = {"░", "▒", "▓", "█"};
 
 int WIDTH = 60;
 int HEIGHT = 60;
-
+int NUM_BALLS = 6;
 
 
 
 int brightness(int red, int green, int blue) {
-  // 0.299 r + 0.587 g + 0.114 b
-  // return red;
   return (0.299 * red + green * 0.587 + blue * 0.114);
 }
 
@@ -56,9 +53,9 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 
 				int r = 100 + (int)(155 * c);  // emphasize center
 				int g = 100 + (int)(155 * t);  // overall blending
-				int b = 255;                    // keep bluish
+				int b = 100;                    // keep bluish
 
-				char blaa[64*2];
+				char* blaa = malloc(sizeof(char) * 100);
 				sprintf(blaa,"\033[38;2;%d;%d;%dm%s%s",r,g,b,
 								unicode1[(brightness(r,g,b) * (4 - 1) / 255)],
 								unicode1[(brightness(r,g,b) * (4 - 1) / 255)]);
@@ -67,8 +64,6 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 				/* 				ascii1[(brightness(r,g,b) * (strlen(ascii1) - 1) / 255)]); */
 
 				setPixel(canvas,x,y,blaa,TRANS,TRANS);
-				//				setCharAt(x,y,blaa);
-
 			}
 		}
 	}
@@ -94,15 +89,13 @@ void* bla(void* arg) {
 
 int main(){
 	srand(time(NULL));
-	//srand(100);
 
 	WIDTH = termWidth()/2-1;
 	HEIGHT = termHeight()-1;
 		
-	Canvas *canvas = newCanvas(WIDTH, HEIGHT,"  ",RED, WHITE);
-
-
-	Ball* balls[NUM_BALLS];
+	Canvas *canvas = newCanvas(WIDTH, HEIGHT,"  ",RED, BG_GREEN);
+	Ball* balls[NUM_BALLS*10];
+	
 	for(int i = 0; i < NUM_BALLS; i ++){
 		
 		balls[i] = new_ball(rand() % WIDTH,rand() % HEIGHT, rand() % HEIGHT/4);
@@ -115,6 +108,15 @@ int main(){
 			switch((char)getchar()){
 			case 'q':
 				running = 0;
+				break;
+			case 'm':
+				balls[NUM_BALLS++] = new_ball(rand() % WIDTH,rand() % HEIGHT, rand() % HEIGHT/4);
+				break;
+			case 'l':
+				if(NUM_BALLS > 0 ){
+					free(balls[NUM_BALLS-1]);
+					NUM_BALLS--;
+				}
 				break;
 			}
 		}
