@@ -12,7 +12,12 @@
 #define THRESHOLD 0.8f
 
 #define NUM_BALLS 6
-#define NUM_THREADS 8
+#define NUM_THREADS 12
+
+char *ascii1 = " .isk@";
+char *ascii0 =
+  " `.-':_,^=;><+!rc*/"
+  "z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@";
 
 char *unicode1[] = {"░", "▒", "▓", "█"};
 
@@ -47,18 +52,19 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 			if (F > THRESHOLD/4){
 
 				float t = fminf(F / THRESHOLD, 1.0f);     // overall blob intensity
-				float c = fminf(maxF / balls[0]->r, 1.0f);  // local center intensity
+				float c = 0.5f;//fminf(maxF / balls[0]->r, 1.0f);  // local center intensity
 
 				int r = 100 + (int)(155 * c);  // emphasize center
 				int g = 100 + (int)(155 * t);  // overall blending
 				int b = 255;                    // keep bluish
 
-				char *blaa = malloc(sizeof(char)*100);
-				
+				char blaa[64*2];
 				sprintf(blaa,"\033[38;2;%d;%d;%dm%s%s",r,g,b,
 								unicode1[(brightness(r,g,b) * (4 - 1) / 255)],
 								unicode1[(brightness(r,g,b) * (4 - 1) / 255)]);
-
+				/* sprintf(blaa,"\033[38;2;%d;%d;%dm%c%c",r,g,b, */
+				/* 				ascii1[(brightness(r,g,b) * (strlen(ascii1) - 1) / 255)], */
+				/* 				ascii1[(brightness(r,g,b) * (strlen(ascii1) - 1) / 255)]); */
 
 				setPixel(canvas,x,y,blaa,TRANS,TRANS);
 				//				setCharAt(x,y,blaa);
@@ -109,6 +115,7 @@ int main(){
 			switch((char)getchar()){
 			case 'q':
 				running = 0;
+				break;
 			}
 		}
 
@@ -139,7 +146,10 @@ int main(){
 		msleep(20);
 	}
 	// TODO free the BALLS
-
+	for(int i = 0; i < NUM_BALLS; i ++){
+		free(balls[i]);
+	}
+	freeCanvas(canvas);
 
 	return 0;
 }
