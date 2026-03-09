@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -8,9 +9,10 @@
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-#define THRESHOLD 0.5f
+#define THRESHOLD 0.8f
 
-#define NUM_BALLS 4
+#define NUM_BALLS 6
+#define NUM_THREADS 8
 
 char *unicode1[] = {"░", "▒", "▓", "█"};
 
@@ -27,9 +29,9 @@ int brightness(int red, int green, int blue) {
 }
 
 // TODO skip pixels that are really far from any ball
-void update(Canvas* canvas, Ball** balls, int balls_size){
+void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 	for(int y = 0; y < HEIGHT; y++){
-		for(int x = 0; x < WIDTH; x++){
+		for(int x = start; x < end; x++){
 			float F = 0;
 			float maxF = 0.0f;
 			for(int i = 0; i < balls_size; i ++) {
@@ -59,15 +61,34 @@ void update(Canvas* canvas, Ball** balls, int balls_size){
 
 
 				setPixel(canvas,x,y,blaa,TRANS,TRANS);
+				//				setCharAt(x,y,blaa);
 
 			}
 		}
 	}
-
 }
+
+typedef struct {
+	int start;
+	int end;
+	Canvas* canvas;
+	Ball** balls;
+	int num_balls;
+} Argument ;
+
+void* bla(void* arg) {
+	Argument *argument = (Argument*)arg;
+	update(argument->canvas,
+				 argument->balls,
+				 argument->num_balls,
+				 argument->start,
+				 argument->end);
+}
+
 
 int main(){
 	srand(time(NULL));
+	//srand(100);
 
 	WIDTH = termWidth()/2-1;
 	HEIGHT = termHeight()-1;
@@ -78,24 +99,47 @@ int main(){
 	Ball* balls[NUM_BALLS];
 	for(int i = 0; i < NUM_BALLS; i ++){
 		
-		balls[i] = new_ball(rand() % WIDTH,rand() % HEIGHT, rand() % HEIGHT/5);
+		balls[i] = new_ball(rand() % WIDTH,rand() % HEIGHT, rand() % HEIGHT/4);
 	}
-	
-	while(1){
+	int running = 1;
+	while(running){
 		clearPixels(canvas);
+
+		if(kbhit() == 1){
+			switch((char)getchar()){
+			case 'q':
+				running = 0;
+			}
+		}
+
+		pthread_t threads[NUM_THREADS];
+		Argument arguments[NUM_THREADS];
+		for(int i = 0; i < NUM_THREADS; i ++) {
+			arguments[i].canvas = canvas;
+			arguments[i].balls = balls;
+			arguments[i].balls = balls;
+			arguments[i].num_balls = NUM_BALLS;
+			arguments[i].start = i * (WIDTH/NUM_THREADS);
+			arguments[i].end = (i+1) * (WIDTH/NUM_THREADS);
+			
+			pthread_create(&threads[i], NULL, bla, &arguments[i]);
+		}
+		for(int i = 0; i < NUM_THREADS; i ++){
+			pthread_join(threads[i], NULL);
+		}
 		
-		update(canvas,balls,NUM_BALLS);
+		
+		//update(canvas,balls,NUM_BALLS);
 		for(int i = 0; i < NUM_BALLS; i ++){
 			//draw_ball(canvas, balls[i]);
 			update_ball(balls[i], WIDTH,HEIGHT);
 		}
 		
-
-		//		drawBorder(canvas,1);
 		draw(canvas);
-		
 		msleep(20);
 	}
-	
+	// TODO free the BALLS
+
+
 	return 0;
 }

@@ -61,7 +61,7 @@ Ball* new_ball(int x, int y, int r){
 	ball->y = y;
 
 
-	float a = 1;
+	float a = 1.0f;
 	ball->vx = ((float)rand()/(float)(RAND_MAX)) * a;
 	ball->vy = ((float)rand()/(float)(RAND_MAX)) * a;
 
