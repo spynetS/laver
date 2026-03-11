@@ -8,14 +8,22 @@
 #include <math.h>
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
-
-#define THRESHOLD 0.9f
-
-#define NUM_THREADS 12
+#define THRESHOLD 0.7f
+#define NUM_THREADS 1
 
 int WIDTH = 60;
 int HEIGHT = 60;
 int NUM_BALLS = 6;
+
+typedef struct {
+	int start;
+	int end;
+	Canvas* canvas;
+	Ball** balls;
+	int num_balls;
+} Argument ;
+
+
 
 int brightness(int red, int green, int blue) {
   return (0.299 * red + green * 0.587 + blue * 0.114);
@@ -23,7 +31,7 @@ int brightness(int red, int green, int blue) {
 
 // TODO skip pixels that are really far from any ball
 void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
-	for(int y = 0; y < HEIGHT; y++){
+	for(int y = 0; y < HEIGHT/4; y++){
 		for(int x = start; x < end; x++){
 			float F = 0;
 			float maxF = 0.0f;
@@ -35,6 +43,20 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 					
 				F += (balls[i]->r * balls[i]->r)/(d2 + 0.0001f);
 				if(F > maxF) maxF = F;  // track the strongest contribution
+			}
+
+			if(y >= HEIGHT-2){
+				F+= 0.02f;
+			}
+			if(y < 2){
+				F+= 0.02f;
+			}
+
+			if(x >= WIDTH-2){
+				F+= 0.02f;
+			}
+			if(x < 2){
+				F+= 0.02f;
 			}
 
 			if (F > THRESHOLD/4){
@@ -51,13 +73,21 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 	}
 }
 
-typedef struct {
-	int start;
-	int end;
-	Canvas* canvas;
-	Ball** balls;
-	int num_balls;
-} Argument ;
+void size(Ball** balls, int num_balls, float strength) {
+	for(int i = 0; i < num_balls; i ++){
+		balls[i]->r *= strength;
+	}
+}
+
+
+void speed(Ball** balls, int num_balls, float strength) {
+	for(int i = 0; i < num_balls; i ++){
+		balls[i]->vx *= strength;
+		balls[i]->vy *= strength;
+	}
+}
+
+
 
 void* bla(void* arg) {
 	Argument *argument = (Argument*)arg;
@@ -82,12 +112,12 @@ int main(){
 	printf(HIDE_CURSOR);
 	
 	for(int i = 0; i < NUM_BALLS; i ++){
-		
 		balls[i] = new_ball(rand() % WIDTH,rand() % HEIGHT, rand() % HEIGHT/4);
 	}
+	
 	int running = 1;
 	while(running){
-		//clearPixels(canvas);
+
 
 		if(kbhit() == 1){
 			switch((char)getchar()){
@@ -102,6 +132,19 @@ int main(){
 					free(balls[NUM_BALLS-1]);
 					NUM_BALLS--;
 				}
+				break;
+			case 'f':
+				speed(balls, NUM_BALLS, 1.2);
+				break;
+			case 's':
+				speed(balls, NUM_BALLS, 0.8);
+				break;
+			case '+':
+			case '=':
+				size(balls, NUM_BALLS, 1.2);
+				break;
+			case '-':
+				size(balls, NUM_BALLS, 0.8);
 				break;
 			}
 		}
@@ -118,23 +161,18 @@ int main(){
 			
 			pthread_create(&threads[i], NULL, bla, &arguments[i]);
 		}
-		for(int i = 0; i < NUM_THREADS; i ++){
+		for(int i = 0; i < NUM_THREADS; i ++)
 			pthread_join(threads[i], NULL);
-		}
-		
-		
-		for(int i = 0; i < NUM_BALLS; i ++){
-			update_ball(balls[i], WIDTH,HEIGHT);
-		}
+		for(int i = 0; i < NUM_BALLS; i ++)
+			update_ball(balls[i], WIDTH,HEIGHT, 0, 0.0f);
 		
 		draw(canvas);
 	 	msleep(20);
 	}
-	// TODO free the BALLS
+
 	for(int i = 0; i < NUM_BALLS; i ++){
 		free(balls[i]);
 	}
 	free_canvas(canvas);
-
 	return 0;
 }
