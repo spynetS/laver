@@ -39,13 +39,12 @@ void update(Canvas* canvas, Ball** balls, int balls_size, int start, int end){
 
 			if (F > THRESHOLD/4){
 
-				float t = fminf(F / THRESHOLD, 1.0f);     // overall blob intensity
-				float c = 0.5f;//fminf(maxF / balls[0]->r, 1.0f);  // local center intensity
+				float t = fminf(F / THRESHOLD, 1.0f);
+				float c = 0.5f;
 
-				int r = 100 + (int)(155 * t);  // emphasize center
-				int g = 100 + (int)(155 * t);  // overall blending
-				int b = 255;                    // keep bluish
-
+				int r = 180 + (int)(75 * t);
+				int g = 50  + (int)(60 * t);
+				int b = 200 + (int)(55 * t);
 				set_pixel(canvas,x,y,r,g,b);
 			}
 		}
