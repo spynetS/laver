@@ -97,6 +97,16 @@ void speed(Ball** balls, int num_balls, float strength) {
 	}
 }
 
+int radius = 1.0f;
+double angle = 0;
+void rotate_pivot() {
+	gx = radius * cos(angle);
+	gy = radius * sin(angle);
+
+	angle++;
+}
+
+
 void input() {
 	if(kbhit()) {
 		int ch = getchar();
@@ -114,6 +124,7 @@ void input() {
 		} else {
 			switch(ch){
 			case 'q': running = 0; break;
+			case 'r': rotate_pivot(); break;
 			case 'm':
 				if(NUM_BALLS < NUM_BALLS*4){
 					balls[NUM_BALLS++] = new_ball(rand() % WIDTH,
@@ -184,8 +195,12 @@ int main(){
 			pthread_join(threads[i], NULL);
 		
 		for(int i = 0; i < NUM_BALLS; i ++)
-			update_ball(balls[i], WIDTH,HEIGHT, gx, gy);
+			update_ball(balls[i], WIDTH,HEIGHT, 0.1f * gx, 0.1f * gy);
+
+		double x = 5*gx+WIDTH/2;
+		double y = 5*gy+HEIGHT/2;
 		
+		set_pixel(canvas, x, y, 255, 255, 255);
 		draw(canvas);
 		msleep(20);
 	}
